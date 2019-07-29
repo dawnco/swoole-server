@@ -1,0 +1,6 @@
+/nbproject
+.idea/
+.svn/
+wmi/config/config.php
+data
+*.log
