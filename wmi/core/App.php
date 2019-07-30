@@ -24,24 +24,24 @@ class App {
         $this->_server = new Server($host, $port);
         Log::console("Listen $host:$port");
         $this->_server->set([
-            'worker_num'               => 1,
+            'worker_num'            => Config::get("worker_num"),
+            //'dispatch_mode'         => 4,
             //'task_worker_num'          => 1,
-            'task_enable_coroutine'    => true,
+            'task_enable_coroutine' => true,
             //'daemonize'                => true,
-            'backlog'                  => 128,
-            'heartbeat_check_interval' => 60,
-            'heartbeat_idle_time'      => 180,
-            'user'                     => 'www',
-            'group'                    => 'www',
-            'pid_file'                 => ROOT . '/data/server.pid',
-            'log_file'                 => ROOT . '/data/log/app.log',
-            'log_level'                => 1,
+            'backlog'               => 128,
+            'user'                  => 'www',
+            'group'                 => 'www',
+            'pid_file'              => ROOT . '/data/server.pid',
+            'log_file'              => ROOT . '/data/log/app.log',
+            'log_level'             => 1,
         ]);
     }
 
     public function start() {
         $this->_server->on('start', [$this, "onStart"]);
         $this->_server->on('workerStart', [$this, "onWorkerStart"]);
+        $this->_server->on('connect', [$this, "onConnect"]);
         $this->_server->on('request', [$this, "onRequest"]);
 
         //$this->_server->on('task', [$this, 'onTask']);
@@ -65,7 +65,11 @@ class App {
         include ROOT . "/vendor/autoload.php";
         PoolManager::init();
         new Error();
-        Log::console("Worker start");
+        Log::console("Worker start id", $worker_id);
+    }
+
+    public function onConnect(Server $server, int $fd, int $reactorId) {
+        Log::console("worker id", $server->worker_id, 'reactor id', $reactorId);
     }
 
     public function onRequest(Request $request, Response $response) {

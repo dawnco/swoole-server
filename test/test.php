@@ -44,13 +44,15 @@ function test() {
 //while (true) {
 //    sleep(1);
 go(function () {
-    co::sleep(10);
-    test();
-    test();
-    test();
-    test();
-    test();
-    test();
+    while (true) {
+        co::sleep(0.01);
+        test();
+        test();
+        test();
+        test();
+        test();
+        test();
+    }
 });
 
 //}

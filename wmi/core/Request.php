@@ -32,5 +32,4 @@ class Request {
             $this->uri = trim($uri, " /");
         }
     }
-
 }

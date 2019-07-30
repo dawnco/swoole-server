@@ -19,8 +19,6 @@ class Portal extends Control {
 
     public function index() {
 
-        Log::console("msg");
-
         go(function () {
             try {
                 $mysql = PoolManager::pop("mysql");
