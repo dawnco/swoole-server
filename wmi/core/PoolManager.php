@@ -14,7 +14,7 @@ use Smf\ConnectionPool\Connectors\PhpRedisConnector;
 use Swoole\Coroutine\Redis;
 use wmi\core\traits\SingleTrait;
 use wmi\lib\Log;
-use wmi\lib\Mysql;
+use wmi\lib\MysqlSwoole;
 
 class PoolManager {
 
@@ -61,15 +61,17 @@ class PoolManager {
         $this->addConnectionPool('redis', $pool2);
     }
 
+    // 已经借出去的连接
+    public $borrowed = ['mysql' => 0, 'redis' => 0];
+
     protected function mysql($callback) {
         try {
-            $pool = $this->getConnectionPool("mysql");
-            $link = new Mysql($pool->borrow());
-            $callback();
-            $pool->return($link);
+            $mysql = $this->pop("mysql");
+            $callback($mysql);
+            $this->push($mysql);
         } catch (\Exception $e) {
-            if ($pool && $link->link) {
-                $pool->return($link->link);
+            if ($mysql) {
+                $this->push($mysql);
             }
             throw $e;
         }
@@ -77,13 +79,12 @@ class PoolManager {
 
     protected function redis($callback) {
         try {
-            $pool = $this->getConnectionPool("redis");
-            $link = $pool->borrow();
+            $link = $this->pop("redis");
             $callback($link);
-            $pool->return($link);
+            $this->push($link);
         } catch (\Exception $e) {
-            if ($pool && $link) {
-                $pool->return($link);
+            if ($link) {
+                $this->push($link);
             }
             throw $e;
         }
@@ -94,11 +95,13 @@ class PoolManager {
             case "mysql":
                 $pool = $this->getConnectionPool("mysql");
                 $link = $pool->borrow();
-                return new Mysql($link);
+                $this->borrowed['mysql']++;
+                return new MysqlSwoole($link);
             break;
             case "redis":
                 $pool = $this->getConnectionPool("redis");
                 $link = $pool->borrow();
+                $this->borrowed['redis']++;
                 return $link;
             break;
         }
@@ -106,20 +109,35 @@ class PoolManager {
     }
 
     protected function push($link) {
-        if ($link instanceof Mysql) {
+        if ($link instanceof MysqlSwoole) {
             $pool = $this->getConnectionPool("mysql");
             $ret  = $pool->return($link->link);
-            unset($link);
+            $this->borrowed['mysql']--;
             return $ret;
         } elseif ($link instanceof \Redis) {
             $pool = $this->getConnectionPool("redis");
-            return $pool->return($link);
+            $ret  = $pool->return($link);
+            $this->borrowed['redis']--;
+            return $ret;
         }
         throw new Exception("push 连接池不存在");
     }
 
     protected function close() {
         $this->closeConnectionPools();
+    }
+
+    protected function status() {
+
+        // 池子中的连接数量
+        $pool                  = $this->getConnectionPool("mysql");
+        $data['mysql']         = $pool->getConnectionCount();
+        $data['mysqlBorrowed'] = $this->borrowed['mysql'];
+        $pool                  = $this->getConnectionPool("redis");
+        $data['redis']         = $pool->getConnectionCount();
+        $data['redisBorrowed'] = $this->borrowed['redis'];
+
+        return $data;
     }
 
     public static function __callStatic($name, $arguments) {

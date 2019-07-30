@@ -7,4 +7,5 @@
 return [
     'portal'   => ['c' => 'Portal', 'm' => 'index'],
     'admin/.*' => ['c' => 'Portal', 'm' => 'index'],
+    'status'   => ['c' => 'StatusControl', 'm' => 'index'],
 ];

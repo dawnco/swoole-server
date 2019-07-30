@@ -20,12 +20,12 @@ class Dispatcher {
             Log::error($e->getMessage());
             Log::error($e->__toString());
             $response->status($e->getCode());
-            $response->end($e->getMessage());
+            $response->end("exception:" . $e->getMessage());
         } catch (\Error $e) {
             Log::error($e->getMessage());
             Log::error($e->__toString());
             $response->status(500);
-            $response->end($e->getMessage());
+            $response->end("error:" . $e->getMessage());
         }
     }
 

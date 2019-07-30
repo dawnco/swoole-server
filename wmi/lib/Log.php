@@ -48,10 +48,17 @@ class Log {
         static::$instance->$name(...$arguments);
     }
 
-    public static function console($msg) {
-        echo date("Y - m - d H:i:s# ");
-        echo $msg;
+    public static function console() {
+        $args = func_get_args();
+        echo date("Y-m-d H:i:s") . " CONSOLE # ";
+        echo implode(" ", $args);
         echo "\n";
     }
 
+    public static function error() {
+        $args = func_get_args();
+        echo date("Y-m-d H:i:s") . " ERROR # ";
+        echo implode(" ", $args);
+        echo "\n";
+    }
 }

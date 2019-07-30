@@ -13,14 +13,13 @@ use wmi\core\PoolManager;
 use wmi\core\Request;
 use wmi\core\Response;
 use wmi\lib\Log;
-use wmi\lib\Mysql;
+use wmi\lib\MysqlSwoole;
 
 class Portal extends Control {
 
     public function index() {
-        PoolManager::redis(function ($redis) {
-            $redis->incr("cbcount");
-        });
+
+        Log::console("msg");
 
         go(function () {
             try {
@@ -28,17 +27,16 @@ class Portal extends Control {
                 $mysql->exec("UPDATE user SET loginIp = ? WHERE id = ?", ['good', 1]);
             } catch (\Throwable $e) {
 
+            } finally {
+                PoolManager::push($mysql);
             }
         });
 
-        $mysql = PoolManager::pop("mysql");
-        $id    = $mysql->getData("SELECT id,name FROM user WHERE  name like ?", ['%3%']);
-        PoolManager::push($mysql);
-        $this->response->end($id);
-        $redis = PoolManager::pop("redis");
-        $redis->rpush("list", $id);
-        $redis->incr("count");
-        PoolManager::push($redis);
+        PoolManager::mysql(function ($mysql) {
+            $id = $mysql->getData("SELECT id,name FROM user WHERE  name like ?l", ['123']);
+        });
+
+        return "123";
     }
 
     public function id($redis, $time = 0) {

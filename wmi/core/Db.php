@@ -15,12 +15,6 @@ abstract class Db {
      */
     public $sql = null;
 
-
-    public function debug() {
-        echo "<pre>";
-        var_dump($this->sql);
-    }
-
     /**
      * 根据条件拼接sql where片段
      * 主要解决前台可选一项或多项条件进行查询时的sql拼接
@@ -67,8 +61,8 @@ abstract class Db {
         }
 
         $query = str_replace(
-            array('?lr', '?ll', '?l', '?i', '?s', '?p', '?'),
-            array('"%s%%"', '"%%%s"', '"%%%s%%"', '%d', '"%s"', '%s', '"%s"'),
+            ['?lr', '?ll', '?l', '?i', '?s', '?p', '?'],
+            ['"%s%%"', '"%%%s"', '"%%%s%%"', '%d', '"%s"', '%s', '"%s"'],
             $query);
 
         foreach ($data as $k => $v) {
