@@ -16,10 +16,11 @@ class Response {
     }
 
     public function end($content) {
-        if (is_array($content)) {
-            return $this->response->end(json_encode($content));
-        } elseif ($content) {
+        $this->response->header('Server', 'WMI-SERVER');
+        if (!$content || is_scalar($content)) {
             return $this->response->end($content);
+        } else {
+            return $this->response->end(json_encode($content));
         }
     }
 

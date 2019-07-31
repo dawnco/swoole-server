@@ -285,11 +285,11 @@ class MysqlSwoole extends Db {
 
         $stmt = $this->link->prepare($query);
         if ($stmt === false) {
-            $this->throwError($sql);
+            $this->throwError($query);
         }
         $result = $stmt->execute();
         if ($result === false) {
-            $this->throwError($sql);
+            $this->throwError($query);
         }
 
         $end         = microtime(true);
@@ -362,8 +362,8 @@ class MysqlSwoole extends Db {
         }
     }
 
-    public function throwError($sql) {
-        Log::error('数据库错误', [$this->link->errno, $this->link->error, $sql]);
+    public function throwError($sql = null) {
+        Log::error('数据库错误', $this->link->errno, $this->link->error, $sql);
         throw new Exception("数据库错误");
     }
 

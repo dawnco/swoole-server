@@ -18,23 +18,11 @@ use wmi\lib\MysqlSwoole;
 class Portal extends Control {
 
     public function index() {
-
-        go(function () {
-            try {
-                $mysql = PoolManager::pop("mysql");
-                $mysql->exec("UPDATE user SET loginIp = ? WHERE id = ?", ['good', 1]);
-            } catch (\Throwable $e) {
-
-            } finally {
-                PoolManager::push($mysql);
-            }
-        });
-
-        PoolManager::mysql(function ($mysql) {
-            $id = $mysql->getData("SELECT id,name FROM user WHERE  name like ?l", ['123']);
-        });
-
-        return "123";
+        $mysql = PoolManager::pop("mysql");
+        //$mysql->exec("UPDATE user SET loginIp = ? WHERE id = ?", ['good', 1]);
+        $id = $mysql->getData("SELECT * FROM cashlogs_201907 WHERE  sn = ?", ['SPK20190709184342697931']);
+        PoolManager::push($mysql);
+        return $this->request->post['p'] ?: '';
     }
 
     public function id($redis, $time = 0) {

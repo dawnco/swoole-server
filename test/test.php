@@ -13,45 +13,47 @@ function post($host, $port, $uri, $data) {
         'Accept'          => 'text/html,application/xhtml+xml,application/xml',
         'Accept-Encoding' => 'gzip',
     ]);
-    $cli->set(['timeout' => 5]);
+    $cli->set(['timeout' => -1]);
     $cli->post($uri, $data);
     if ($cli->statusCode != 200) {
-        line($host, $uri, "status code", $cli->statusCode);
+
+        $statusCode = [
+            -1 => '连接超时 服务器未监听端口或网络丢失',
+            -2 => '请求超时 服务器未在规定的timeout时间内返回',
+            -3 => '客户端请求发出后，服务器强制切断连接',
+        ];
+
+        line($host, $uri, "status code", $statusCode[$cli->statusCode] ?? $cli->statusCode, 'error code', $cli->errCode);
     }
     $body = $cli->body;
     $cli->close();
     line($body);
 }
 
-function send($token) {
-
+function send($p) {
     $sn = post('192.168.0.11', 9999, '/', [
-        'gameCode'    => 'qznn',
-        'gameRoomId'  => '6',
-        "gamePlayId"  => '4',
-        "money"       => random_int(10, 30),
-        "mines"       => '',
-        "paypassword" => '222222',
-        "token"       => $token
+        'p' => $p
     ]);
 }
 
-function test() {
-    $send  = "17749931078";
-    $token = send($send);
+function test($p) {
+    go(function () use ($p) {
+        send($p);
+    });
 }
 
 //while (true) {
 //    sleep(1);
 go(function () {
+    $index = 0;
     while (true) {
-        co::sleep(0.01);
-        test();
-        test();
-        test();
-        test();
-        test();
-        test();
+        $index++;
+        co::sleep(1);
+        test($index . "-1");
+        test($index . "-2");
+        test($index . "-3");
+        test($index . "-4");
+        test($index . "-5");
     }
 });
 

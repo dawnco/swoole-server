@@ -13,19 +13,15 @@ class Dispatcher {
 
         try {
             $content = self::dispatch($request, $response);
-            if ($content !== null) {
-                $response->end($content);
-            }
+            $response->end($content);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
             Log::error($e->__toString());
             $response->status($e->getCode());
-            $response->end("exception:" . $e->getMessage());
+            $response->end("exception: " . $e->getMessage());
         } catch (\Error $e) {
-            Log::error($e->getMessage());
             Log::error($e->__toString());
             $response->status(500);
-            $response->end("error:" . $e->getMessage());
+            $response->end("error: " . $e->getMessage());
         }
     }
 

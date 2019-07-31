@@ -6,34 +6,14 @@
 
 namespace wmi\lib;
 
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 use wmi\core\Config;
+use wmi\lib\command\Color;
 
 class Log {
 
     protected static $instance = null;
 
     protected static function instance() {
-        // create a log channel
-        static::$instance = new Logger('name');
-
-        $level = Logger::ERROR;
-        switch (Config::get("app", 'log_level')) {
-            case 'debug':
-                $level = Logger::DEBUG;
-            break;
-            case 'notice':
-                $level = Logger::NOTICE;
-            break;
-            case 'info':
-                $level = Logger::INFO;
-            break;
-            case 'error':
-                $level = Logger::ERROR;
-            break;
-        }
-        static::$instance->pushHandler(new StreamHandler(ROOT . "/data/log/" . date("Y-m-d") . ".log", $level));
 
     }
 
@@ -48,17 +28,44 @@ class Log {
         static::$instance->$name(...$arguments);
     }
 
-    public static function console() {
-        $args = func_get_args();
-        echo date("Y-m-d H:i:s") . " CONSOLE # ";
-        echo implode(" ", $args);
-        echo "\n";
+    public static function console(...$args) {
+        self::printMessage('console', $args);
     }
 
-    public static function error() {
-        $args = func_get_args();
-        echo date("Y-m-d H:i:s") . " ERROR # ";
-        echo implode(" ", $args);
-        echo "\n";
+    public static function error(...$args) {
+        self::printMessage('error', $args);
+    }
+
+    public static function info(...$args) {
+        self::printMessage('info', $args);
+    }
+
+    protected static function printMessage($type, $args) {
+        echo sprintf("%s %s - %s%s",
+            date("Y-m-d H:i:s"),
+            strtoupper($type),
+            self::printColorMessage($type, implode(" ", $args)),
+            PHP_EOL
+        );
+    }
+
+    protected static function printColorMessage($level, $message) {
+        // 带颜色打印
+        switch ($level) {
+            case 'error':
+                $message = Color::new(Color::FG_RED)->sprint($message);
+            break;
+            case 'warning':
+                $message = Color::new(Color::FG_YELLOW)->sprint($message);
+            break;
+            case 'notice':
+                $message = Color::new(Color::FG_GREEN)->sprint($message);
+            break;
+            //case 'info':
+            //    $message = Color::new(Color::FG_BLUE)->sprint($message);
+            //break;
+        }
+
+        return $message;
     }
 }

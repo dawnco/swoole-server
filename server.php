@@ -5,6 +5,6 @@
  */
 
 define("APP_NAME", "app");
-include __DIR__ . "/wmi/server.php";
-$app = new \wmi\core\App();
+include __DIR__ . "/wmi/autoload.php";
+$app = new \wmi\core\Server();
 $app->start();

@@ -70,7 +70,7 @@ class PoolManager {
             $callback($mysql);
             $this->push($mysql);
         } catch (\Exception $e) {
-            if ($mysql) {
+            if (isset($mysql) && $mysql) {
                 $this->push($mysql);
             }
             throw $e;
@@ -83,7 +83,7 @@ class PoolManager {
             $callback($link);
             $this->push($link);
         } catch (\Exception $e) {
-            if ($link) {
+            if (isset($link) && $link) {
                 $this->push($link);
             }
             throw $e;
