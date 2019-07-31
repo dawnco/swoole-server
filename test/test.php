@@ -32,6 +32,7 @@ function post($host, $port, $uri, $data) {
 
 function send($p) {
     $sn = post('192.168.0.11', 9999, '/', [
+    //$sn = post('192.168.0.11', 80, '/api/login', [
         'p' => $p
     ]);
 }

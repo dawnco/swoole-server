@@ -65,7 +65,7 @@ class Server {
     }
 
     public function onConnect(\Swoole\http\Server $server, int $fd, int $reactorId) {
-        Log::console("worker id", $server->worker_id, 'reactor id', $reactorId);
+        //Log::console("worker id", $server->worker_id, 'reactor id', $reactorId);
     }
 
     public function onRequest(Request $request, Response $response) {

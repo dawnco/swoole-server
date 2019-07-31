@@ -18,8 +18,8 @@ use wmi\lib\Log;
 
 class Portal extends Control {
     public function index() {
-        $id = $this->id(null, time());
-        usleep(random_int(1, 100) * 10000);
+        $mysql = Helper::database();
+        $mysql->getData("SELECT * FROM cashlogs_201907 WHERE outSn = ?", ['SPK20190709184328641881']);
         return posix_getpid();
     }
 
