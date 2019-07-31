@@ -19,13 +19,13 @@ class Request {
     public $fd;
 
     public function __construct(\Swoole\Http\Request $request) {
-        //$this->serverId = $request->server
-        $this->fd      = $request->fd;
-        $this->post    = $request->post;
-        $this->get     = $request->get;
-        $this->request = $request->request;
-        $this->cookie  = $request->cookie;
-        $uri           = $request->server['path_info'];
+
+        $this->fd        = $request->fd;
+        $this->post      = $request->post;
+        $this->get       = $request->get;
+        $this->request   = $request->request;
+        $this->cookie    = $request->cookie;
+        $uri             = $request->server['path_info'];
         if ($uri == '/') {
             $this->uri = "portal";
         } else {

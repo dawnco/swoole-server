@@ -12,20 +12,20 @@ use wmi\contract\Control;
 use wmi\core\PoolManager;
 use wmi\core\Request;
 use wmi\core\Response;
+use wmi\lib\database\Mysql;
+use wmi\lib\Helper;
 use wmi\lib\Log;
-use wmi\lib\MysqlSwoole;
 
 class Portal extends Control {
-
     public function index() {
-        $mysql = PoolManager::pop("mysql");
-        //$mysql->exec("UPDATE user SET loginIp = ? WHERE id = ?", ['good', 1]);
-        $id = $mysql->getData("SELECT * FROM cashlogs_201907 WHERE  sn = ?", ['SPK20190709184342697931']);
-        PoolManager::push($mysql);
-        return $this->request->post['p'] ?: '';
+        $id = $this->id(null, time());
+        usleep(random_int(1, 100) * 10000);
+        return posix_getpid();
     }
 
     public function id($redis, $time = 0) {
+
+        $redis = Helper::redis();
 
         $time   = $time ?: time();
         $key    = date('s', $time);

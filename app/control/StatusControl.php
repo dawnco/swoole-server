@@ -8,20 +8,38 @@ namespace app\control;
 
 
 use wmi\contract\Control;
+use wmi\core\Config;
 use wmi\core\PoolManager;
+use wmi\lib\database\Mysql;
+use wmi\lib\database\Redis;
+
 
 class StatusControl extends Control {
 
     public function index() {
-        $status = PoolManager::status();
-        $str    = <<<EOT
+
+
+        $str = '';
+        foreach (Config::get('mysql') as $v) {
+            $status = PoolManager::status($v['name']);
+            $str    .= <<<EOT
 <pre>
-MySQL links : {$status['mysql']}
-MySQL borrowed : {$status['mysqlBorrowed']}
-Redis links : {$status['redis']}
-Redis borrowed : {$status['redisBorrowed']}
+{$v['name']} links      : {$status['links']}
+{$v['name']} available  : {$status['available']}
 </pre>
 EOT;
+        }
+
+        foreach (Config::get('redis') as $v) {
+            $status = PoolManager::status($v['name']);
+            $str    .= <<<EOT
+<pre>
+{$v['name']} links     : {$status['links']}
+{$v['name']} available : {$status['available']}
+</pre>
+EOT;
+        }
+
 
         return $str;
     }

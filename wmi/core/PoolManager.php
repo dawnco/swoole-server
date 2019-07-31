@@ -11,10 +11,6 @@ use Smf\ConnectionPool\ConnectionPoolTrait;
 use Smf\ConnectionPool\Connectors\CoroutineMySQLConnector;
 use Smf\ConnectionPool\Connectors\PhpRedisConnector;
 
-use Swoole\Coroutine\Redis;
-use wmi\core\traits\SingleTrait;
-use wmi\lib\Log;
-use wmi\lib\MysqlSwoole;
 
 class PoolManager {
 
@@ -23,120 +19,88 @@ class PoolManager {
     use ConnectionPoolTrait;
 
     protected function init() {
+
+        $config = Config::get('mysql');
+        foreach ($config as $c) {
+            $this->_initMysql($c);
+        }
+
+        $config = Config::get('redis');
+        foreach ($config as $c) {
+            $this->_initRedis($c);
+        }
+    }
+
+    protected function _initMysql($config) {
         // 所有的MySQL连接数区间：[4 workers * 2 = 8, 4 workers * 10 = 40]
-        $pool1 = new ConnectionPool(
+        $pool = new ConnectionPool(
             [
-                'minActive' => Config::get("mysql.pool.min"),
-                'maxActive' => Config::get("mysql.pool.max"),
+                'minActive' => $config["pool_min"],
+                'maxActive' => $config["pool_max"],
             ],
             new CoroutineMySQLConnector,
             [
-                'host'        => Config::get("mysql.host"),
-                'port'        => Config::get("mysql.port"),
-                'user'        => Config::get("mysql.user"),
-                'password'    => Config::get("mysql.password"),
-                'database'    => Config::get("mysql.database"),
-                'timeout'     => Config::get("mysql.timeout"),
-                'charset'     => Config::get("mysql.charset"),
+                'host'        => $config["host"],
+                'port'        => $config["port"],
+                'user'        => $config["user"],
+                'password'    => $config["password"],
+                'database'    => $config["database"],
+                'timeout'     => $config["timeout"],
+                'charset'     => $config["charset"],
                 'strict_type' => true,
                 'fetch_mode'  => true,
             ]);
-        $pool1->init();
-        $this->addConnectionPool('mysql', $pool1);
+        $pool->init();
+        $this->addConnectionPool($config['name'], $pool);
+    }
 
+    protected function _initRedis($config) {
         // 所有Redis连接数区间：[4 workers * 5 = 20, 4 workers * 20 = 80]
-        $pool2 = new ConnectionPool(
+        $pool = new ConnectionPool(
             [
-                'minActive' => Config::get("redis.pool.min"),
-                'maxActive' => Config::get("redis.pool.max"),
+                'minActive' => $config["pool_min"],
+                'maxActive' => $config["pool_max"],
             ],
             new PhpRedisConnector,
             [
-                'host'     => Config::get("redis.host"),
-                'port'     => Config::get("redis.port"),
-                'database' => Config::get("redis.database"),
-                'password' => Config::get("redis.password"),
+                'host'     => $config["host"],
+                'port'     => $config["port"],
+                'database' => $config["database"],
+                'password' => $config["password"] ?? null,
             ]);
-        $pool2->init();
-        $this->addConnectionPool('redis', $pool2);
+        $pool->init();
+        $this->addConnectionPool($config['name'], $pool);
     }
 
-    // 已经借出去的连接
-    public $borrowed = ['mysql' => 0, 'redis' => 0];
-
-    protected function mysql($callback) {
-        try {
-            $mysql = $this->pop("mysql");
-            $callback($mysql);
-            $this->push($mysql);
-        } catch (\Exception $e) {
-            if (isset($mysql) && $mysql) {
-                $this->push($mysql);
-            }
-            throw $e;
-        }
-    }
-
-    protected function redis($callback) {
-        try {
-            $link = $this->pop("redis");
-            $callback($link);
-            $this->push($link);
-        } catch (\Exception $e) {
-            if (isset($link) && $link) {
-                $this->push($link);
-            }
-            throw $e;
-        }
-    }
-
+    /**
+     * @param $name
+     * @return Database
+     * @throws Exception
+     * @throws \Smf\ConnectionPool\BorrowConnectionTimeoutException
+     */
     protected function pop($name) {
-        switch ($name) {
-            case "mysql":
-                $pool = $this->getConnectionPool("mysql");
-                $link = $pool->borrow();
-                $this->borrowed['mysql']++;
-                return new MysqlSwoole($link);
-            break;
-            case "redis":
-                $pool = $this->getConnectionPool("redis");
-                $link = $pool->borrow();
-                $this->borrowed['redis']++;
-                return $link;
-            break;
-        }
-        throw new Exception("pop $name 连接池不存在");
+        $pool = $this->getConnectionPool($name);
+        $link = $pool->borrow();
+        return $link;
     }
 
-    protected function push($link) {
-        if ($link instanceof MysqlSwoole) {
-            $pool = $this->getConnectionPool("mysql");
-            $ret  = $pool->return($link->link);
-            $this->borrowed['mysql']--;
-            return $ret;
-        } elseif ($link instanceof \Redis) {
-            $pool = $this->getConnectionPool("redis");
-            $ret  = $pool->return($link);
-            $this->borrowed['redis']--;
-            return $ret;
-        }
-        throw new Exception("push 连接池不存在");
+    protected function push($name, $link) {
+        $pool = $this->getConnectionPool($name);
+        $ret  = $pool->return($link);
+        return $ret;
     }
 
     protected function close() {
         $this->closeConnectionPools();
     }
 
-    protected function status() {
-
+    protected function status($name) {
         // 池子中的连接数量
-        $pool                  = $this->getConnectionPool("mysql");
-        $data['mysql']         = $pool->getConnectionCount();
-        $data['mysqlBorrowed'] = $this->borrowed['mysql'];
-        $pool                  = $this->getConnectionPool("redis");
-        $data['redis']         = $pool->getConnectionCount();
-        $data['redisBorrowed'] = $this->borrowed['redis'];
-
+        $pool = $this->getConnectionPool($name);
+        $data = [
+            'links'     => $pool->getConnectionCount(), // 总共的连接数
+            'available' => $pool->getIdleCount(), // 可用的连接数
+        ];
         return $data;
     }
 

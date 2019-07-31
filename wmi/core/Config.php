@@ -12,10 +12,16 @@ class Config {
     private static $file = [];
 
     public static function get($name) {
-        self::load();
+        static::load();
 
-        $keys = explode(".", $name);
-        $val  = self::$data;
+        if (func_num_args() == 1) {
+            $keys = explode(".", $name);
+        } else {
+            $keys = func_get_args();
+        }
+
+
+        $val = self::$data;
 
         foreach ($keys as $v) {
             if (isset($val[$v])) {
