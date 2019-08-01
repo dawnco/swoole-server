@@ -35,8 +35,10 @@ class PoolManager {
         // 所有的MySQL连接数区间：[4 workers * 2 = 8, 4 workers * 10 = 40]
         $pool = new ConnectionPool(
             [
-                'minActive' => $config["pool_min"],
-                'maxActive' => $config["pool_max"],
+                'minActive'         => $config["poolMin"],
+                'maxActive'         => $config["poolMax"],
+                'maxIdleTime'       => $config['maxIdleTime'],
+                'idleCheckInterval' => $config['idleCheckInterval'],
             ],
             new CoroutineMySQLConnector,
             [
@@ -58,8 +60,8 @@ class PoolManager {
         // 所有Redis连接数区间：[4 workers * 5 = 20, 4 workers * 20 = 80]
         $pool = new ConnectionPool(
             [
-                'minActive' => $config["pool_min"],
-                'maxActive' => $config["pool_max"],
+                'minActive' => $config["poolMin"],
+                'maxActive' => $config["poolMax"],
             ],
             new PhpRedisConnector,
             [

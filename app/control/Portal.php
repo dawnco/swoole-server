@@ -17,10 +17,12 @@ use wmi\lib\Helper;
 use wmi\lib\Log;
 
 class Portal extends Control {
+
+
     public function index() {
         $mysql = Helper::database();
-        $mysql->getData("SELECT * FROM cashlogs_201907 WHERE outSn = ?", ['SPK20190709184328641881']);
-        return posix_getpid();
+        $test  = $mysql->getData("SELECT * FROM cashlogs_201907 WHERE outSn = ?", ['SPK20190709184328641881']);
+        return $test;
     }
 
     public function id($redis, $time = 0) {
