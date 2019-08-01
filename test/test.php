@@ -54,7 +54,7 @@ go(function () {
         test($index . "-2");
         test($index . "-3");
         test($index . "-4");
-        //test($index . "-5");
+        test($index . "-5");
     }
 });
 

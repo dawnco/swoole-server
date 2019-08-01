@@ -53,7 +53,7 @@ class PoolManager {
                 'fetch_mode'  => true,
             ]);
         $pool->init();
-        $this->addConnectionPool($config['name'], $pool);
+        $this->addConnectionPool($config['poolName'], $pool);
     }
 
     protected function _initRedis($config) {
@@ -71,7 +71,7 @@ class PoolManager {
                 'password' => $config["password"] ?? null,
             ]);
         $pool->init();
-        $this->addConnectionPool($config['name'], $pool);
+        $this->addConnectionPool($config['poolName'], $pool);
     }
 
     /**

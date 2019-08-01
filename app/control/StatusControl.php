@@ -21,21 +21,21 @@ class StatusControl extends Control {
 
         $str = '';
         foreach (Config::get('mysql') as $v) {
-            $status = PoolManager::status($v['name']);
+            $status = PoolManager::status($v['poolName']);
             $str    .= <<<EOT
 <pre>
-{$v['name']} links      : {$status['links']}
-{$v['name']} available  : {$status['available']}
+{$v['poolName']} links      : {$status['links']}
+{$v['poolName']} available  : {$status['available']}
 </pre>
 EOT;
         }
 
         foreach (Config::get('redis') as $v) {
-            $status = PoolManager::status($v['name']);
+            $status = PoolManager::status($v['poolName']);
             $str    .= <<<EOT
 <pre>
-{$v['name']} links     : {$status['links']}
-{$v['name']} available : {$status['available']}
+{$v['poolName']} links     : {$status['links']}
+{$v['poolName']} available : {$status['available']}
 </pre>
 EOT;
         }

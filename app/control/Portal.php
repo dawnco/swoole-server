@@ -22,6 +22,11 @@ class Portal extends Control {
     public function index() {
         $mysql = Helper::database();
         $test  = $mysql->getData("SELECT * FROM cashlogs_201907 WHERE outSn = ?", ['SPK20190709184328641881']);
+        go(function () use ($mysql) {
+            \co::sleep(3);
+            Log::debug(\co::getCid());
+            $test = $mysql->getLine("SELECT * FROM cashlogs_201907 WHERE outSn = ?", ['SPK20190709184328641881']);
+        });
         return $test;
     }
 

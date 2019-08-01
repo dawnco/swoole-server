@@ -39,6 +39,7 @@ class Database {
     }
 
     public function __destruct() {
+        Log::info(static::class, "__destruct");
         $this->release();
     }
 }

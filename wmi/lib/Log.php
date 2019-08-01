@@ -40,6 +40,10 @@ class Log {
         self::printMessage('info', $args);
     }
 
+    public static function debug(...$args) {
+        self::printMessage('debug', $args);
+    }
+
     protected static function printMessage($type, $args) {
         echo sprintf("%s %s - %s%s",
             date("Y-m-d H:i:s"),
