@@ -7,6 +7,7 @@
 namespace app\control;
 
 
+use app\lib\Wallet;
 use Swoole\Coroutine\Http\Client;
 use wmi\contract\Control;
 use wmi\core\PoolManager;
@@ -18,16 +19,15 @@ use wmi\lib\Log;
 
 class Portal extends Control {
 
-
     public function index() {
-        $mysql = Helper::database();
-        $test  = $mysql->getData("SELECT * FROM cashlogs_201907 WHERE outSn = ?", ['SPK20190709184328641881']);
-        go(function () use ($mysql) {
-            \co::sleep(3);
-            Log::debug(\co::getCid());
-            $test = $mysql->getLine("SELECT * FROM cashlogs_201907 WHERE outSn = ?", ['SPK20190709184328641881']);
-        });
-        return $test;
+        $mysql  = Helper::database();
+        $wallet = new Wallet(1003, $mysql);
+        try {
+            $wallet->minus(1, 'minus');
+        } catch (\Throwable $e) {
+            return $e->getMessage();
+        }
+        return $wallet->balance();
     }
 
     public function id($redis, $time = 0) {

@@ -9,7 +9,7 @@ include __DIR__ . "/wmi/autoload.php";
 $server = new \wmi\core\Server();
 $act    = $argv[1] ?? 'start';
 
-$allow = ['start', 'reload', 'stop'];
+$allow = ['start', 'reload', 'stop', 'restart'];
 if (in_array($act, $allow)) {
     $server->$act();
 } else {

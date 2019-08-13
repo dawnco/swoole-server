@@ -50,6 +50,7 @@ class Server {
         $this->_server->on('start', [$this, "onStart"]);
         $this->_server->on('workerStart', [$this, "onWorkerStart"]);
         $this->_server->on('connect', [$this, "onConnect"]);
+        $this->_server->on('Close', [$this, "onClose"]);
         $this->_server->on('request', [$this, "onRequest"]);
 
         // Worker正常退出或错误退出时，关闭连接池，释放连接
@@ -63,7 +64,12 @@ class Server {
         if (is_file($this->_pidFile)) {
             $pid = file_get_contents($this->_pidFile);
             Process::kill($pid);
-            unlink($this->_pidFile);
+            while (is_file($this->_pidFile)) {
+                echo ".";
+                usleep(100000);
+                clearstatcache();
+            }
+            echo PHP_EOL;
             Log::console("server stopped");
         }
     }
@@ -74,6 +80,11 @@ class Server {
             Process::kill($pid, SIGUSR1);
             Log::console("server reloaded");
         }
+    }
+
+    public function restart() {
+        $this->stop();
+        $this->start();
     }
 
     public function onStart() {
@@ -97,6 +108,11 @@ class Server {
         $req = new \wmi\core\Request($request);
         $res = new \wmi\core\Response($response);
         Dispatcher::resolve($req, $res);
+    }
+
+    public function onClose(\Swoole\Server $server, int $fd, int $reactorId) {
+        //Log::debug("tcp contentions", count($server->connections));
+        //Log::debug('server close');
     }
 
     public function onWorkerStop(\Swoole\Server $server, int $worker_id) {

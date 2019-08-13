@@ -1,6 +1,7 @@
 <?php
 
 function line() {
+    echo date("H:i:s ");
     echo implode(" ", func_get_args());
     echo "\n";
 }
@@ -12,6 +13,7 @@ function post($host, $port, $uri, $data) {
         "User-Agent"      => 'Chrome/49.0.2587.3',
         'Accept'          => 'text/html,application/xhtml+xml,application/xml',
         'Accept-Encoding' => 'gzip',
+        'Connection'      => 'close',
     ]);
     $cli->set(['timeout' => -1]);
     $cli->post($uri, $data);
@@ -26,8 +28,9 @@ function post($host, $port, $uri, $data) {
         line($host, $uri, "status code", $statusCode[$cli->statusCode] ?? $cli->statusCode, 'error code', $cli->errCode);
     }
     $body = $cli->body;
-    $cli->close();
-    line($body);
+    $r = $cli->close();
+    line("close", $r);
+    //line($body);
 }
 
 function send($p) {

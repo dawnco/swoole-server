@@ -45,7 +45,7 @@ class Log {
     }
 
     protected static function printMessage($type, $args) {
-        echo sprintf("%s %s - %s%s",
+        echo sprintf("[ %s %s ] %s%s",
             date("Y-m-d H:i:s"),
             strtoupper($type),
             self::printColorMessage($type, implode(" ", $args)),

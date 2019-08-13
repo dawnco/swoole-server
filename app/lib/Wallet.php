@@ -17,9 +17,15 @@ class Wallet {
     protected $info = [];
 
     public function __construct($id, $db) {
-        $this->id   = $id;
-        $this->db   = $db;
-        $this->info = $this->db->getLineBy("member", $this->id);
+        $this->id = $id;
+        $this->db = $db;
+    }
+
+    public function getInfo() {
+        if (!$this->info) {
+            $this->info = $this->db->getLineBy("member", $this->id);
+        }
+        return $this->info;
     }
 
     /**
@@ -54,11 +60,15 @@ class Wallet {
     protected function operate($money, $item, $remark) {
         try {
             $this->db->begin();
-            $user = $this->lock();
-            $ret  = $this->db->exec("UPDATE member SET wallet = wallet + ? WHERE id = ?", [$money, $this->id]);
+            $wallet = $this->lock();
+            if ($money < 0 && ($wallet + $money < 0)) {
+                throw new Exception("余额不足");
+            }
+
+            $ret = $this->db->exec("UPDATE member SET wallet = wallet + ? WHERE id = ?", [$money, $this->id]);
             $this->db->commit();
             return $ret;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->db->rollback();
             throw $e;
         }
@@ -128,15 +138,15 @@ class Wallet {
      */
     public function balance($available = true) {
         if ($available) {
-            return $this->db->getVar("SELECT money - freeze FROM memebr WHERE id =?", [$this->id]);
+            return $this->db->getVar("SELECT wallet - freeze FROM member WHERE id =?", [$this->id]);
         } else {
-            return $this->db->getVar("SELECT money FROM memebr WHERE id =?", [$this->id]);
+            return $this->db->getVar("SELECT wallet FROM member WHERE id =?", [$this->id]);
 
         }
     }
 
     protected function lock() {
-        return $this->db->getLine("SELECT * FROM user WHERE id = ? FOR UPDATE", [$this->id]);
+        return $this->db->getVar("SELECT wallet FROM member WHERE id = ? FOR UPDATE", [$this->id]);
     }
 
 }
