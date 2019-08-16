@@ -32,8 +32,7 @@ class Portal extends Control {
 
     public function id($redis, $time = 0) {
 
-        $redis = Helper::redis();
-
+        $redis  = Helper::redis();
         $time   = $time ?: time();
         $key    = date('s', $time);
         $script = <<<EOT

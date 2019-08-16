@@ -29,18 +29,18 @@ class Server {
             return Log::console('server is running');
         }
 
-        $host          = Config::get("server.host");
-        $port          = Config::get("server.port");
+        $host          = Conf::get("server.host");
+        $port          = Conf::get("server.port");
         $this->_server = new \Swoole\http\Server($host, $port);
         Log::console("Listen $host:$port");
 
         $this->_server->set([
-            'worker_num'            => Config::get("server.worker_num"),
+            'worker_num'            => Conf::get("server.worker_num"),
             'task_enable_coroutine' => true,
-            'daemonize'             => Config::get("server.daemonize"),
+            'daemonize'             => Conf::get("server.daemonize"),
             'backlog'               => 128,
-            'user'                  => Config::get("server.user"),
-            'group'                 => Config::get("server.group"),
+            'user'                  => Conf::get("server.user"),
+            'group'                 => Conf::get("server.group"),
             'pid_file'              => $this->_pidFile,
             'log_file'              => ROOT . '/data/log/server.log',
             'log_level'             => 1,
@@ -94,7 +94,7 @@ class Server {
     }
 
     public function onWorkerStart(\Swoole\http\Server $server, int $worker_id) {
-        Config::reload();
+        Conf::reload();
         include ROOT . "/vendor/autoload.php";
         PoolManager::init();
         Log::console("Worker start", $worker_id);

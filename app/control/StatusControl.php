@@ -8,7 +8,7 @@ namespace app\control;
 
 
 use wmi\contract\Control;
-use wmi\core\Config;
+use wmi\core\Conf;
 use wmi\core\PoolManager;
 use wmi\lib\database\Mysql;
 use wmi\lib\database\Redis;
@@ -20,7 +20,7 @@ class StatusControl extends Control {
 
 
         $str = '';
-        foreach (Config::get('mysql') as $v) {
+        foreach (Conf::get('mysql') as $v) {
             $status = PoolManager::status($v['poolName']);
             $str    .= <<<EOT
 <pre>
@@ -30,7 +30,7 @@ class StatusControl extends Control {
 EOT;
         }
 
-        foreach (Config::get('redis') as $v) {
+        foreach (Conf::get('redis') as $v) {
             $status = PoolManager::status($v['poolName']);
             $str    .= <<<EOT
 <pre>

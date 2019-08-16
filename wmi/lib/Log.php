@@ -6,7 +6,7 @@
 
 namespace wmi\lib;
 
-use wmi\core\Config;
+use wmi\core\Conf;
 use wmi\lib\command\Color;
 
 class Log {

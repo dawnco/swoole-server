@@ -16,7 +16,7 @@ class Hook extends BaseTract {
     public function __construct($request, $response) {
         parent::__construct($request, $response);
 
-        $hooks = Config::file("hook");
+        $hooks = Conf::file("hook");
         foreach ($hooks as $preg => $hook) {
             if (preg_match("#^$preg$#i", $request->uri)) {
 

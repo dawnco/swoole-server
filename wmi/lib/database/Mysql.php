@@ -104,8 +104,8 @@ class Mysql extends Database {
         if (!$stmt) {
             return false;
         }
-        $row = $stmt->fetch();
-        return $row;
+        $row = $stmt->fetchAll();
+        return $row[0] ?? false;
     }
 
     /**
@@ -379,9 +379,9 @@ class Mysql extends Database {
      * @return boolean
      */
     public function exec($query, $bind = null) {
-        $query  = $this->prepare($query, $bind);
-        $result = $this->__exec($query);
-        return $result;
+        $query = $this->prepare($query, $bind);
+        $stmt  = $this->__exec($query);
+        return $stmt;
     }
 
     /**

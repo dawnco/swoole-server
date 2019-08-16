@@ -29,7 +29,7 @@ class Route {
      */
     public function resolve() {
         $routed = false;
-        $rules  = Config::file("url");
+        $rules  = Conf::file("url");
 
         //是否配置过路由
         foreach ($rules as $muri => $rule) {

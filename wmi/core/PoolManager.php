@@ -20,12 +20,12 @@ class PoolManager {
 
     protected function init() {
 
-        $config = Config::get('mysql');
+        $config = Conf::get('mysql');
         foreach ($config as $c) {
             $this->_initMysql($c);
         }
 
-        $config = Config::get('redis');
+        $config = Conf::get('redis');
         foreach ($config as $c) {
             $this->_initRedis($c);
         }
